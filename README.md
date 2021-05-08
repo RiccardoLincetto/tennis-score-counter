@@ -4,6 +4,7 @@ Score-board content extractor from Tennis TV broadcast.
 ## Time logs
 In this section is reported the time spent on the task.
 - 06/05/21 19:25 - 19:50: first considerations and search on existing resources
+- 08/05/21 09:35 - :
 
 # Considerations
 - For a single match, the score-board is expected to be in a fixed position, possibly being shown intermittently, and not changing its aspect. This allows further refinements after the first detection.
@@ -19,3 +20,6 @@ In this section is reported the time spent on the task.
 
 # Resources
 - https://github.com/gdmurray/ml-scoreboard-extraction
+
+# Repo structure
+`data/` contains the downloaded zip, with an annotated video.
