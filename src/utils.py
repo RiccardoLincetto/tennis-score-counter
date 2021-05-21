@@ -20,7 +20,8 @@ def read_annotations(filename=ANNOTATIONS) -> dict:
     Read and parse annotations file.
 
     :param filename: path to json file containing annotations.
-    :return: annotations dictionary, with keys (str) indicating the frame number, and fields bbox, serving_player, name_1, name_2, score_1, score_2.
+    :return: annotations dictionary, with keys (str) indicating the frame number, and fields bbox, serving_player,
+        name_1, name_2, score_1, score_2.
     """
     with open(filename, 'r') as input_file:
         annotations = json.loads(input_file.read())
@@ -35,6 +36,10 @@ def extract_frame(filename=VIDEO, index=0) -> np.ndarray:
     :param index: frame index. If out of bounds, selected randomly.
     :return: frame with opencv convention (BGR).
     """
+    # Prevent function from receiving str keys as index
+    if isinstance(index, str):
+        index = int(index)
+        print("Warning: extract_frame method needs an integer, string passed.")
     cap = cv2.VideoCapture(filename)
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     if not 0 <= index < n_frames:
@@ -45,6 +50,16 @@ def extract_frame(filename=VIDEO, index=0) -> np.ndarray:
     cap.release()
     return frame
 
+
+def extract_box_from_frame(frame: np.ndarray, bbox: list) -> np.ndarray:
+    """
+    Extract rectangle from image, provided a bounding box.
+
+    :param frame: input frame.
+    :param bbox: 4-element list containing [x0 y0 x1 y1].
+    :return: bounded part of the frame.
+    """
+    return frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2]), :]
 
 '''
 def write_video(filename=VIDEO, annotations=None, estimates=None):

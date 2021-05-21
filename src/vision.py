@@ -2,6 +2,9 @@ import os
 
 import cv2
 import numpy as np
+import pytesseract
+
+pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 
 
 def find_rectangles(img: np.ndarray) -> list:
@@ -69,7 +72,7 @@ def find_squares(img):
             for cnt in contours:
                 cnt_len = cv2.arcLength(cnt, True)
                 cnt = cv2.approxPolyDP(cnt, 0.02*cnt_len, True)
-                if len(cnt) == 4 and 1000 < cv2.contourArea(cnt) < bin.shape[0] * bin.shape[1] * 0.2 \
+                if len(cnt) == 4 and 1000 < cv2.contourArea(cnt) < bin.shape[0] * bin.shape[1] * 0.05 \
                         and cv2.isContourConvex(cnt):
                     cnt = cnt.reshape(-1, 2)
                     max_cos = np.max([utils.angle_cos( cnt[i], cnt[(i+1) % 4], cnt[(i+2) % 4] ) for i in range(4)])
@@ -78,6 +81,7 @@ def find_squares(img):
     return squares
 
 
+# TODO try using L1-norm instead of L2-norm for favouring corners
 def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
     """
     Score rectangles proportionally to their likelihood of being the scoreboard.
@@ -88,42 +92,69 @@ def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
 
     :param img: input image.
     :param rectangles: list of rectangles, expressed as 4 x 2 lists containing the vertices.
-    :return: scores for rectangles, of the same length of input list.
+    :return: scores for rectangles, of the same length of input list. Each score is a value in range [0,1],
+        but the output vector does not represent a pdf yet, for visualization purposes.
     """
     rates = np.zeros(len(rectangles))  # output initialization
 
     # Centre distance
     img_centre = np.array(img.shape[:2]) // 2  # frame central coordinates
-    max_dist = np.linalg.norm(img_centre)  # maximum distance from centre (computed with [0,0] and [xc,yc])
+    max_dist = np.linalg.norm(img_centre, 1)  # maximum distance from centre (computed with [0,0] and [xc,yc])
     for i, rect in enumerate(rectangles):
         rect_centre = np.mean(rect, axis=0)
         rates[i] = np.linalg.norm(rect_centre - img_centre) / max_dist
 
-    return rates
+    return rates  # TODO return pdf: / np.sum(rates)
 
 
 if __name__ == "__main__":  # Single image processing
 
+    import argparse
+    from random import choice
     import utils
 
-    # TODO extract random frame (with utils function)
-    frame = cv2.imread(os.path.join("..", "data", "sample.jpg"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--debug", action="store_true", dest="debug", default=False)
+    args = parser.parse_args()
 
-    # Draw squares
-    # squares = find_rectangles(frame)
+    # Extract frame with available annotations
+    annotations = utils.read_annotations(
+        os.path.join("..", "data", "top-100-shots-rallies-2018-atp-season-scoreboard-annotations.json"))
+    k = choice(list(annotations))
+    annotations = annotations[k]
+    frame = utils.extract_frame(os.path.join("..", "data", "top-100-shots-rallies-2018-atp-season.mp4"), int(k))
+    if args.debug:
+        frame_out = frame.copy()
+        # cv2.drawContours(frame_out, [], -1, (0, 255, 0), 3)  # TODO check required contour format
+        cv2.imwrite(os.path.join("..", "data", "debug", "frame.png"), frame_out)
+        del frame_out
+
+    # Extract groundtruth scoreboard
+    box = utils.extract_box_from_frame(frame, annotations['bbox'])
+    if args.debug:
+        frame_out = box.copy()
+        # cv2.drawContours(frame_out, [], -1, (0, 255, 0), 3)  # TODO check required contour format
+        cv2.imwrite(os.path.join("..", "data", "debug", "frame-scoreboard.png"), frame_out)
+        del frame_out
+
+    # Groundtruth OCR
+    print(f"From annotated box:\n{pytesseract.image_to_string(box)}", end="\n\n")
+
+    # Extract rectangles
     squares = find_squares(frame)
-    # cv2.drawContours(frame, squares, -1, (0, 255, 0), 3)
-    # cv2.imwrite(os.path.join("..", "data", "sample-rects.jpg"), frame)
+    # squares = find_rectangles(frame)
+    if args.debug:
+        frame_out = frame.copy()
+        cv2.drawContours(frame_out, squares, -1, (0, 255, 0), 3)
+        cv2.imwrite(os.path.join("..", "data", "debug", "frame-rects.png"), frame_out)
+        del frame_out
 
     # Rate rectangles
     scores = rate_rectangles(frame, squares)
     scores_sorted_index = np.flip(np.argsort(scores))
-
-    # Display top-k rectangles
-    for i in range(6):
-        cv2.drawContours(frame, [squares[scores_sorted_index[i]]], -1, (0, 255, 0), 3)
-
-    # Draw rectangles
-    # for i, rect in enumerate(squares):
-    #     cv2.drawContours(frame, [rect], -1, (int(scores[i] * 255), 255, 0), 10)
-    cv2.imwrite(os.path.join("..", "data", "sample-rects-scored.jpg"), frame)
+    if args.debug:
+        frame_out = frame.copy()
+        for i, rect in enumerate(squares):
+            cv2.drawContours(frame_out, [rect], -1, [int(scores[i] * 255)] * 3, 5)
+        cv2.imwrite(os.path.join("..", "data", "debug", "frame-rects-scored.png"), frame_out)
+        del frame_out
