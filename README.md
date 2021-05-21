@@ -17,6 +17,8 @@ In this section is reported the time spent on the task.
 - Scoreboards are overlays to the image and thus might be segmented from the background.
 - Time variability is almost absent, except for translucient overlays. In the provided examples though the camera is fixed, so this is true for most of the content, making this consideration unusable.
 - Color is usally constant (at least within patches), so histograms are peaked (one or more, but with low dispersion)
+- Tesseract has different performances when run on entire image or on groundtruth scoreboard. This means preprocessing is important. The images might be reshaped, which means the aspect
+ratio of the image could vary. This is important to be checked for a correct OCR.
 
 # Ideas
 - Find rectangles which have alphanumeric characters within.

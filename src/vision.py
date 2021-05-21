@@ -138,6 +138,7 @@ if __name__ == "__main__":  # Single image processing
         del frame_out
 
     # Groundtruth OCR
+    print(f"From whole image:\n{pytesseract.image_to_string(frame)}", end="\n\n")
     print(f"From annotated box:\n{pytesseract.image_to_string(box)}", end="\n\n")
 
     # Extract rectangles
