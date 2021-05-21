@@ -4,11 +4,15 @@
 ARG VARIANT="focal"
 FROM mcr.microsoft.com/vscode/devcontainers/base:0-${VARIANT}
 
-# [Optional] Uncomment this section to install additional OS packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends python3-pip tesseract-ocr
+# Install Python
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive && \
+    apt-get -y install --no-install-recommends python3-pip && \
+    pip3 install numpy
 
-# Install Python requirements
-RUN pip3 install numpy \
-                 opencv-contrib-python \
-                 pytesseract
+# Install opencv
+RUN apt install -y ffmpeg libsm6 libxext6 libgl1-mesa-glx && \
+    pip3 install opencv-contrib-python
+
+# Install tesseract
+RUN apt install -y tesseract-ocr && \
+    pip3 install pytesseract

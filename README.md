@@ -8,6 +8,7 @@ In this section is reported the time spent on the task.
 - 09/05/21 16:50 - 17:30: tesseract installation troubleshooting
 - 12/05/21 22:00 - 23:30: opencv rectangle extraction
 - 13/05/21 21:30 - 22:00: switch to containerised environment
+- 18/05/21 08:00 - 08:45: repo reorganization
 
 # Considerations
 - For a single match, the score-board is expected to be in a fixed position, possibly being shown intermittently, and not changing its aspect. This allows further refinements after the first detection.
