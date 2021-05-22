@@ -101,7 +101,8 @@ def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
     max_dist = np.linalg.norm(img_centre)  # maximum distance from centre (computed between top-left corner [0,0] and img_centre)
     for i, rect in enumerate(rectangles):
         rect_centre = np.mean(rect, axis=0)
-        rates[i] = np.linalg.norm(rect_centre - img_centre) / max_dist
+        # Get rates proportional to the squared distance to favour edge rectangles
+        rates[i] = (np.linalg.norm(rect_centre - img_centre) / max_dist) ** 2
 
     return rates  # TODO return pdf: / np.sum(rates)
 
