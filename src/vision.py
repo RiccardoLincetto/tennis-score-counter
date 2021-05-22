@@ -81,7 +81,6 @@ def find_squares(img):
     return squares
 
 
-# TODO try using L1-norm instead of L2-norm for favouring corners
 def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
     """
     Score rectangles proportionally to their likelihood of being the scoreboard.
@@ -99,7 +98,7 @@ def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
 
     # Centre distance
     img_centre = np.array(img.shape[:2]) // 2  # frame central coordinates
-    max_dist = np.linalg.norm(img_centre, 1)  # maximum distance from centre (computed with [0,0] and [xc,yc])
+    max_dist = np.linalg.norm(img_centre)  # maximum distance from centre (computed with [0,0] and [xc,yc])
     for i, rect in enumerate(rectangles):
         rect_centre = np.mean(rect, axis=0)
         rates[i] = np.linalg.norm(rect_centre - img_centre) / max_dist
