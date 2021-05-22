@@ -90,15 +90,15 @@ def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
     Alphanumeric characters are within it.
 
     :param img: input image.
-    :param rectangles: list of rectangles, expressed as 4 x 2 lists containing the vertices.
+    :param rectangles: list of N rectangles, where each rectangle is a 4 x 2 numpy array containing the vertices with notation [x, y].
     :return: scores for rectangles, of the same length of input list. Each score is a value in range [0,1],
         but the output vector does not represent a pdf yet, for visualization purposes.
     """
     rates = np.zeros(len(rectangles))  # output initialization
 
     # Centre distance
-    img_centre = np.array(img.shape[:2]) // 2  # frame central coordinates
-    max_dist = np.linalg.norm(img_centre)  # maximum distance from centre (computed with [0,0] and [xc,yc])
+    img_centre = np.flip(np.array(img.shape[:2]) // 2)  # frame central coordinates [x, y]
+    max_dist = np.linalg.norm(img_centre)  # maximum distance from centre (computed between top-left corner [0,0] and img_centre)
     for i, rect in enumerate(rectangles):
         rect_centre = np.mean(rect, axis=0)
         rates[i] = np.linalg.norm(rect_centre - img_centre) / max_dist

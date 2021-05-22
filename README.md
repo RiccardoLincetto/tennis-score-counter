@@ -11,6 +11,7 @@ In this section is reported the time spent on the task.
 - 18/05/21 08:00 - 08:45: repo reorganization
 - 21/05/21 08:00 - 08:30: pipeline validation
 - 21/05/21 22:30 - 23:00: pipeline validation
+- 22/05/21 10:00 - 10:30: debug bad distance-based rectangle-rating 
 
 # Considerations
 - For a single match, the score-board is expected to be in a fixed position, possibly being shown intermittently, and not changing its aspect. This allows further refinements after the first detection.
