@@ -87,6 +87,7 @@ if __name__ == "__main__":  # Single image processing
 
     import argparse
     from random import choice
+    import sys
     import utils
 
     parser = argparse.ArgumentParser()
@@ -165,3 +166,8 @@ if __name__ == "__main__":  # Single image processing
 
         if found:
             break
+
+    if not found:
+        sys.exit(1)
+
+    print(f"From extracted box:\n{pytesseract.image_to_string(utils.extract_box_from_frame(frame, utils.convert_to_rect(rectangles[pointer_outer])))}")
