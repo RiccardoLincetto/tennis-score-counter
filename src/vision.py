@@ -76,6 +76,9 @@ def rate_rectangles(img: np.ndarray, rectangles: list) -> np.ndarray:
         rect_centre = np.mean(rect, axis=0)
         # Get rates proportional to the squared distance to favour edge rectangles
         rates[i] = (np.linalg.norm(rect_centre - img_centre) / max_dist) ** 2
+        # ASSUMPTION keep only if in bottom left quadrant
+        if rect_centre[0] > img_centre[0] or rect_centre[1] < img_centre[1]:
+            rates[i] = 0
 
     return rates  # TODO return pdf: / np.sum(rates)
 
@@ -123,3 +126,42 @@ if __name__ == "__main__":  # Single image processing
             cv2.drawContours(frame_out, [rect], -1, [int(scores[i] * 255)] * 3, 5)
         cv2.imwrite(str(OUTPUT_PATH/"frame-rects-scored.png"), frame_out)
         del frame_out
+
+    # Tentative scoreboard identification
+    # Tentatives proceed in order of rectangle rating. As soon as a rectangle with text on two lines is found, the loop breaks.
+    found = False
+    for index_outer, pointer_outer in enumerate(scores_sorted_index):
+        print(f"Tentative {index_outer}: {rectangles[pointer_outer]}")
+
+        # Condition 1: there are 2 rows of text to be read from.
+        coords = utils.convert_to_rect(rectangles[pointer_outer])
+        coords[3] = coords[3] - (coords[3] - coords[1]) // 2
+        upper_patch = utils.extract_box_from_frame(frame, coords)
+        line1 = pytesseract.image_to_string(upper_patch).strip()
+        coords = utils.convert_to_rect(rectangles[pointer_outer])
+        coords[1] = coords[1] + (coords[3] - coords[1]) // 2
+        bottom_patch = utils.extract_box_from_frame(frame, coords)
+        line2 = pytesseract.image_to_string(bottom_patch).strip()
+        if args.debug:
+            cv2.imwrite(str(OUTPUT_PATH/"scoreboard-upper.png"), upper_patch)
+            cv2.imwrite(str(OUTPUT_PATH/"scoreboard-bottom.png"), bottom_patch)
+        if len(line1) == 0 or len(line2) == 0:  # no text found on at least one row
+            continue
+
+        # ASSUMPTION: the scoreboard contains another, smaller, detected rectangle.
+        for index_inner, pointer_inner in enumerate(scores_sorted_index):
+            # Skip self
+            if index_inner == index_outer:
+                continue
+            if utils.is_inside(outer_rect=utils.convert_to_rect(rectangles[pointer_outer]),
+                               inner_rect=utils.convert_to_rect(rectangles[pointer_inner])):
+                print("Found")
+                if args.debug:
+                    frame_out = frame.copy()
+                    cv2.drawContours(frame_out, [rectangles[pointer_outer], rectangles[pointer_inner]], -1, [0, 255, 0], 3)
+                    cv2.imwrite(str(OUTPUT_PATH/"frame-rects-contained.png"), frame_out)
+                found = True
+                break
+
+        if found:
+            break

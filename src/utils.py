@@ -61,6 +61,30 @@ def extract_box_from_frame(frame: np.ndarray, bbox: list) -> np.ndarray:
     """
     return frame[int(bbox[1]):int(bbox[3]), int(bbox[0]):int(bbox[2]), :]
 
+
+def convert_to_rect(rectangle: np.ndarray) -> np.ndarray:
+    """
+    Transform rectangle description from 4 [x, y] points into [x0 y0 x1 y1] (TL, BR).
+
+    :param rectangle: array of shape [4, 2], where rows are of type [x, y].
+    :return: 4-element array of type [x0 y0 x1 y1]
+    """
+    return np.concatenate([np.min(rectangle, axis=0), np.max(rectangle, axis=0)])
+
+
+def is_inside(outer_rect: np.ndarray, inner_rect: np.ndarray, tolerance=3) -> bool:
+    """
+    Returns whether inner_rect is inside outer_rect, with a margin.
+
+    :param outer_rect: 4-element list containing [x0 y0 x1 y1].
+    :param inner_rect: 4-element list containing [x0 y0 x1 y1].
+    :param tolerance: tolerance in pixels.
+    :return: whether inner_rect is contained in outer_rect.
+    """
+    return (inner_rect[:2] >= outer_rect[:2] - tolerance).all() and \
+        (inner_rect[2:] <= outer_rect[2:] + tolerance).all()
+
+
 '''
 def write_video(filename=VIDEO, annotations=None, estimates=None):
     """Re-write video with annotations"""

@@ -16,10 +16,11 @@ In this section is reported the time spent on the task.
 - 22/05/21 15:00 - 16:00: scoreboard class and logic for its selection
 - 22/05/21 17:45 - 18:45: pre-processing for tesseract
 - 22/05/21 11:00 - 12:00: scoreboard localization
-- 22/05/21 15:00 - : scoreboard localization
+- 22/05/21 15:00 - 17:30: scoreboard localization
+- 22/05/21 23:00 - 23:30: scoreboard localization
 
 ### Tasks
-- [ ] scoreboard localization
+- [x] scoreboard localization
 - [ ] text extraction
 
 # Considerations
