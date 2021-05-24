@@ -18,6 +18,7 @@ In this section is reported the time spent on the task.
 - 22/05/21 11:00 - 12:00: scoreboard localization
 - 22/05/21 15:00 - 17:30: scoreboard localization
 - 22/05/21 23:00 - 23:30: scoreboard localization
+- 22/05/21 07:20 - 07:35: pre-processing for tesseract
 
 ### Tasks
 - [x] scoreboard localization

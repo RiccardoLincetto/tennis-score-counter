@@ -155,7 +155,7 @@ if __name__ == "__main__":  # Single image processing
             if index_inner == index_outer:
                 continue
             if utils.is_inside(outer_rect=utils.convert_to_rect(rectangles[pointer_outer]),
-                               inner_rect=utils.convert_to_rect(rectangles[pointer_inner])):
+                               inner_rect=utils.convert_to_rect(rectangles[pointer_inner])):  # TODO add check on inner width, must be less then outer
                 print("Found")
                 if args.debug:
                     frame_out = frame.copy()
@@ -170,4 +170,12 @@ if __name__ == "__main__":  # Single image processing
     if not found:
         sys.exit(1)
 
-    print(f"From extracted box:\n{pytesseract.image_to_string(utils.extract_box_from_frame(frame, utils.convert_to_rect(rectangles[pointer_outer])))}")
+    # OCR preprocessing
+    estimated_scoreboard = utils.extract_box_from_frame(frame, utils.convert_to_rect(rectangles[pointer_outer]))
+    estimated_scoreboard = cv2.cvtColor(estimated_scoreboard, cv2.COLOR_BGR2GRAY)
+    estimated_scoreboard = cv2.threshold(estimated_scoreboard, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)[1]
+    cv2.morphologyEx(estimated_scoreboard, cv2.MORPH_OPEN, np.ones((5,5),np.uint8))
+    if args.debug:
+        cv2.imwrite(str(OUTPUT_PATH/"scoreboard-preprocessed.png"), estimated_scoreboard)
+
+    print(f"From extracted box:\n{pytesseract.image_to_string(estimated_scoreboard)}")
