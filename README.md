@@ -1,26 +1,7 @@
 # tennis-score-counter
 Score-board content extractor from Tennis TV broadcast.
 
-## Time logs
-In this section is reported the time spent on the task.
-- 06/05/21 19:25 - 19:50: first considerations and search on existing resources
-- 08/05/21 09:35 - 10:10: tesseract installation tentative
-- 09/05/21 16:50 - 17:30: tesseract installation troubleshooting
-- 12/05/21 22:00 - 23:30: opencv rectangle extraction
-- 13/05/21 21:30 - 22:00: switch to containerised environment
-- 18/05/21 08:00 - 08:45: repo reorganization
-- 21/05/21 08:00 - 08:30: pipeline validation
-- 21/05/21 22:30 - 23:00: pipeline validation
-- 22/05/21 10:00 - 10:30: debug bad distance-based rectangle-rating
-- 22/05/21 10:30 - 12:30: scoreboard class and logic for its selection
-- 22/05/21 15:00 - 16:00: scoreboard class and logic for its selection
-- 22/05/21 17:45 - 18:45: pre-processing for tesseract
-- 22/05/21 11:00 - 12:00: scoreboard localization
-- 22/05/21 15:00 - 17:30: scoreboard localization
-- 22/05/21 23:00 - 23:30: scoreboard localization
-- 22/05/21 07:20 - 07:35: pre-processing for tesseract
-
-### Tasks
+## Tasks
 - [x] scoreboard localization
 - [ ] text extraction
 
