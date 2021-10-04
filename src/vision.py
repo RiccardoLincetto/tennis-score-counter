@@ -5,6 +5,8 @@ import cv2
 import numpy as np
 import pytesseract
 
+import utils
+
 pytesseract.pytesseract.tesseract_cmd = "/usr/bin/tesseract"
 OUTPUT_PATH = pathlib.Path("../data/debug")
 
@@ -101,6 +103,8 @@ if __name__ == "__main__":  # Single image processing
     annotations = annotations[k]                                # bbox: [x0 y0 x1 y1]
     frame = utils.extract_frame(os.path.join("..", "data", "top-100-shots-rallies-2018-atp-season.mp4"), int(k))
     box = utils.extract_box_from_frame(frame, annotations['bbox'])
+    scoreboard_target = utils.Scoreboard(annotations['bbox'])
+    box = scoreboard_target.get_overlay_from_frame(frame)
     if args.debug:
         cv2.imwrite(str(OUTPUT_PATH/"frame.png"), frame)        # Original frame
         cv2.imwrite(str(OUTPUT_PATH/"scoreboard.png"), box)     # Target scoreboard
@@ -179,3 +183,13 @@ if __name__ == "__main__":  # Single image processing
         cv2.imwrite(str(OUTPUT_PATH/"scoreboard-preprocessed.png"), estimated_scoreboard)
 
     print(f"From extracted box:\n{pytesseract.image_to_string(estimated_scoreboard)}")
+
+    # Get boxes from OCR
+    boxes = pytesseract.image_to_boxes(frame)
+    img = frame.copy()
+    h, w, c = img.shape
+    for b in boxes.splitlines():
+        b = b.split(' ')
+        img = cv2.rectangle(img, (int(b[1]), h - int(b[2])), (int(b[3]), h - int(b[4])), (0, 255, 0), 2)
+    if args.debug:
+        cv2.imwrite(str(OUTPUT_PATH/"frame-ocr-boxes.png"), img)

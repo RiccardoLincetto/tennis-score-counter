@@ -128,3 +128,77 @@ def plot_lines(image, lines):
 def angle_cos(p0, p1, p2):
     d1, d2 = (p0 - p1).astype('float'), (p2 - p1).astype('float')
     return abs(np.dot(d1, d2) / np.sqrt(np.dot(d1, d1) * np.dot(d2, d2)))
+
+
+class Scoreboard:
+
+    def __init__(self, coordinates: np.ndarray) -> None:
+        """
+        Keeps track of the scoreboard frame position and provides methods to extract information from it.
+
+        :param coords: vector containing coordinates of the overlay. Two options are available:
+            - the first is a vector of shape [4, 2] where the first axis identifies the 4 corner points and
+                the second axis the point coordinates as [x, y]. In this case, the smallest rectangle containing all points is kept;
+            - the second is a 4-element vector containing [x0, y0, x1, y1], describing a rectangle with top-left corner
+                [x0, y0] and bottom right corner [x1, y1].
+        """
+        # Check input coordinates shape
+        if isinstance(coordinates, list):
+            try:
+                coordinates = np.array(coordinates)
+            except _ as e:
+                print(e)
+        if coordinates.shape == (4, 2):
+            self.position = convert_to_rect(coordinates)
+        elif coordinates.shape == (4,):
+            # TODO check top-left and bottom-right validity
+            self.position = coordinates
+
+        # Convert position to array of integers
+        # keeping the fractional parts of each point within the defined rectangle.
+        self.position[:2] = [np.floor(coord) for coord in self.position[:2]]
+        self.position[2:] = [np.ceil(coord) for coord in self.position[2:]]
+        self.position = self.position.astype(dtype=np.int32)
+    
+    @property
+    def top_left(self):
+        return self.position[:2]
+
+    @property
+    def bottom_right(self):
+        return self.position[2:]
+
+    @property
+    def width(self):
+        return self.position[2] - self.position[0] + 1
+
+    @property
+    def height(self):
+        return self.position[3] - self.position[1] + 1
+    
+    def as_rect(self) -> np.ndarray:
+        """
+        Return array describing the rectangle in xywh format.
+
+        :return: array with [x0, y0, width, height].
+        """
+        return np.array([*self.position[:2], self.width, self.height], dtype=int)
+
+    def get_overlay_from_frame(self, frame: np.ndarray, player=0) -> np.ndarray:
+        """
+        Extract scoreboard from provided frame.
+
+        :param frame: image frame from which to extract the scoreboard patch.
+        :param player: Score is assumed to contain information divided into 2 vertically-stacked rows, of equal height.
+            This parameter can assume three options:
+            0: entire overlay;
+            1: upper half (player 1);
+            2: bottom half (player 2).
+        :return: scoreboard frame portion.
+        """
+        coords = list(self.position)
+        if player == 1:  # upper half
+            coords[3] = coords[3] - (coords[3] - coords[1]) // 2
+        if player == 2:  # bottom half
+            coords[1] = coords[1] + (coords[3] - coords[1]) // 2
+        return extract_box_from_frame(frame, coords)

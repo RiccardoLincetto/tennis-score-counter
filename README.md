@@ -2,8 +2,9 @@
 Score-board content extractor from Tennis TV broadcast.
 
 ## Tasks
-- [x] scoreboard localization
-- [ ] text extraction
+- [x] rectangles localization
+- [ ] scoreboard selection
+- [x] text extraction
 
 # Considerations
 - For a single match, the score-board is expected to be in a fixed position, possibly being shown intermittently, and not changing its aspect. This allows further refinements after the first detection.
